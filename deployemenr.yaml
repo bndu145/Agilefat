@@ -1,0 +1,38 @@
+name=docker-compose.yml
+version: '3.8'
+
+services:
+  # Main web application service
+  university-dept-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: university-dept-webpage
+    ports:
+      - "8080:80"
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
+    networks:
+      - university-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "app=university-dept-webpage"
+      - "version=1.0"
+
+networks:
+  university-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
